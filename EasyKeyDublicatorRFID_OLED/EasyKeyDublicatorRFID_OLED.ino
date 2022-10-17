@@ -56,8 +56,8 @@ emMode copierMode = md_empty;
 void OLED_printKey(byte buf[8], byte msgType = 0){
   String st;
   switch (msgType){
-    case 0: st = "The key " + String(EEPROM_key_index) + " of " + String(EEPROM_key_count) + " in ROM"; break;      
-    case 1: st = "Hold the Btn to save";  break; 
+    case 0: st = "Key #" + String(EEPROM_key_index) + " of " + String(EEPROM_key_count) + " in ROM"; break;      
+    case 1: st = "Hold the button to save";  break; 
     case 3: st = "The key " + String(indxKeyInROM(buf)) + " exists in ROM";  break;   
   }
   myOLED.clrScr();
@@ -67,10 +67,10 @@ void OLED_printKey(byte buf[8], byte msgType = 0){
   myOLED.print(st, 0, 12);
   st = "Type ";
   switch (keyType){
-    case keyDallas: st += "Dallas wire"; break;      
-    case keyCyfral: st += "Cyfral wire";  break;  
-    case keyMetacom: st += "Metakom wire"; break;             
-    case keyEM_Marine: st += "EM_Marine rfid"; break;
+    case keyDallas: st += "DS1990"; break;      
+    case keyCyfral: st += "CF2004";  break;  
+    case keyMetacom: st += "MT200X"; break;             
+    case keyEM_Marine: st += "EM_Marin RFID"; break;
     case keyUnknown: st += "Unknown"; break;
   }
   myOLED.print(st, 0, 24);
@@ -98,7 +98,7 @@ void setup() {
   myOLED.clrScr();                                          //Очищаем буфер дисплея.
   myOLED.setFont(SmallFont);                                //Перед выводом текста необходимо выбрать шрифт
   myOLED.print(F("Welcome to ArduKeyCopy!"), LEFT, 0);
-  char st[16] = {98, 121, 32, 77, 69, 88, 65, 84, 80, 79, 72, 32, 68, 73, 89, 0};
+  char st[30] = {98 121 32 77 69 88 65 84 80 79 72 32 68 73 89 59 32 102 111 114 107 32 98 121 32 79 66 71 117 121};
   myOLED.print(st, LEFT, 24);
   myOLED.update();
   Sd_StartOK();
