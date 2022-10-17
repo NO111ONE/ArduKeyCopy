@@ -97,7 +97,7 @@ void setup() {
   Serial.begin(115200);
   myOLED.clrScr();                                          //Очищаем буфер дисплея.
   myOLED.setFont(SmallFont);                                //Перед выводом текста необходимо выбрать шрифт
-  myOLED.print(F("Hello, read a key..."), LEFT, 0);
+  myOLED.print(F("Welcome to ArduKeyCopy!"), LEFT, 0);
   char st[16] = {98, 121, 32, 77, 69, 88, 65, 84, 80, 79, 72, 32, 68, 73, 89, 0};
   myOLED.print(st, LEFT, 24);
   myOLED.update();
@@ -207,7 +207,7 @@ emRWType getRWtype(){
   answer = ibutton.read();
   //Serial.print(F("\n Answer RW-1990.1: ")); Serial.println(answer, HEX);
   if (answer == 0xFE){
-    Serial.println(F(" Type: dallas RW-1990.1 "));
+    Serial.println(F(" Type: DS: RW-1990.1"));
     return RW1990_1;            // это RW-1990.1
   }
   // пробуем определить RW-1990.2
@@ -220,7 +220,7 @@ emRWType getRWtype(){
     ibutton.reset(); ibutton.write(0x1D); // возвращаем оратно запрет записи для RW-1990.2
     ibutton.write_bit(0);                 // записываем значение флага записи = 0 - выключаем запись
     delay(10); pinMode(iButtonPin, INPUT);
-    Serial.println(F(" Type: dallas RW-1990.2 "));
+    Serial.println(F(" Type: DS: RW-1990.2"));
     return RW1990_2; // это RW-1990.2
   }
   // пробуем определить TM-2004
@@ -233,12 +233,12 @@ emRWType getRWtype(){
   if (OneWire::crc8(m1, 3) == answer) {
     answer = ibutton.read();                                  // читаем регистр статуса
     //Serial.print(" status: "); Serial.println(answer, HEX);
-    Serial.println(F(" Type: dallas TM2004"));
+    Serial.println(F("Type: TM2004: Metacom/CYFRAL"));
     ibutton.reset();
     return TM2004; // это Type: TM2004
   }
   ibutton.reset();
-  Serial.println(F(" Type: dallas unknown, trying TM-01! "));
+  Serial.println(F("Type: DS????; using TM-01!"));
   return TM01;                              // это неизвестный тип DS1990, нужно перебирать алгоритмы записи (TM-01)
 }
 
@@ -260,15 +260,15 @@ bool write2iBtnTM2004(){                // функция записи на TM20
   } 
   if (!result){
     ibutton.reset();
-    Serial.println(F(" The key copy faild"));
-    OLED_printError(F("The key copy faild"));
+    Serial.println(F("Couldn't write key!"));
+    OLED_printError(F("TM write FAIL!"));
     Sd_ErrorBeep();
     digitalWrite(R_Led, HIGH);
     return false;    
   }
   ibutton.reset();
-  Serial.println(F(" The key has copied successesfully"));
-  OLED_printError(F("The key has copied"), false);
+  Serial.println(F("Key written successfully"));
+  OLED_printError(F("TM write PASS"), false);
   Sd_ReadOK();
   delay(2000);
   digitalWrite(R_Led, HIGH);
@@ -303,13 +303,13 @@ bool write2iBtnRW1990_1_2_TM01(emRWType rwType){              // функция 
     }
   digitalWrite(R_Led, LOW);       
   if (!dataIsBurningOK(bitCnt)){                  // проверяем корректность записи
-    Serial.println(F(" The key copy faild"));
-    OLED_printError(F("The key copy faild"));
+    Serial.println(F("Couldn't write key! Data readback failed."));
+    OLED_printError(F("TM write FAIL: bad data checked"));
     Sd_ErrorBeep();
     digitalWrite(R_Led, HIGH);
     return false;
   }
-  Serial.println(F(" The key has copied successesfully"));
+  Serial.println(F("Key written successfully!"));
   if ((keyType == keyMetacom)||(keyType == keyCyfral)){      //переводим ключ из формата dallas
     ibutton.reset();
     if (keyType == keyCyfral) ibutton.write(0xCA);       // send 0xCA - флаг финализации Cyfral
@@ -317,7 +317,7 @@ bool write2iBtnRW1990_1_2_TM01(emRWType rwType){              // функция 
     ibutton.write_bit(1);                             // записываем значение флага финализации = 1 - перевезти формат
     delay(10); pinMode(iButtonPin, INPUT);
   }
-  OLED_printError(F("The key has copied"), false);
+    OLED_printError(F("TM write PASS"), false);
   Sd_ReadOK();
   delay(2000);
   digitalWrite(R_Led, HIGH);
@@ -383,8 +383,8 @@ bool write2iBtn(){
   }
   if (Check == 8) {                           // если коды совпадают, ничего писать не нужно
     digitalWrite(R_Led, LOW); 
-    Serial.println(F(" it is the same key. Writing in not needed."));
-    OLED_printError(F("It is the same key"));
+    Serial.println(F("TM code matches with given key. Writing not done."));
+    OLED_printError(F("TM write FAIL: code matches."));
     Sd_ErrorBeep();
     digitalWrite(R_Led, HIGH);
     delay(1000);
@@ -409,7 +409,7 @@ bool searchIbutton(){
     keyType = keyDallas;
     if (getRWtype() == TM2004) keyType = keyTM2004;
     if (OneWire::crc8(addr, 7) != addr[7]) {
-      Serial.println(F("CRC is not valid!"));
+      Serial.println(F("TM CRC is not valid!"));
       OLED_printError(F("CRC is not valid!"));
       Sd_ErrorBeep();
       digitalWrite(B_Led, HIGH);
@@ -418,9 +418,9 @@ bool searchIbutton(){
     return true;
   }
   switch (addr[0]>>4){
-    case 1: Serial.println(F(" Type: May be cyfral in dallas key")); break;      
-    case 2: Serial.println(F(" Type: May be metacom in dallas key"));  break;  
-    case 3: Serial.println(F(" Type: unknown family dallas")); break;             
+    case 1: Serial.println(F("Type: CF2004 in DS1990")); break;      
+    case 2: Serial.println(F("Type: MT200X in DS1990"));  break;  
+    case 3: Serial.println(F("Type: DS????")); break;             
   }
   keyType = keyUnknown;
   return true;
@@ -500,7 +500,7 @@ bool searchCyfral(){
     Serial.print(addr[i], HEX); Serial.print(":");
     keyID[i] = addr[i];                                         // копируем прочтенный код в ReadID
   }
-  Serial.println(F(" Type: Cyfral "));
+  Serial.println(F("Type: CF2004"));
   return true;  
 }
 
@@ -666,7 +666,7 @@ bool searchEM_Marine( bool copyKey = true){
   Serial.print(rfidData[0]); Serial.print(" key ");
   unsigned long keyNum = (unsigned long)rfidData[1]<<24 | (unsigned long)rfidData[2]<<16 | (unsigned long)rfidData[3]<<8 | (unsigned long)rfidData[4];
   Serial.print(keyNum);
-  Serial.println(F(") Type: EM-Marie "));
+  Serial.println(F(") Type: EM-Marin "));
   if (!copyKey) TCCR2A &=0b00111111;              //Оключить ШИМ COM2A (pin 11)
   digitalWrite(G_Led, gr);
   return rez;
@@ -740,12 +740,12 @@ bool write2rfidT5557(byte* buf){
   for (byte i = 0; i < 8; i++)
     if (addr[i] != keyID[i]) { result = false; break; }
   if (!result){
-    Serial.println(F(" The key copy faild"));
-    OLED_printError(F("The key copy faild"));
+    Serial.println(F("RFID write failure!"));
+    OLED_printError(F("RFID write: FAIL!"));
     Sd_ErrorBeep();
   } else {
-    Serial.println(F(" The key has copied successesfully"));
-    OLED_printError(F("The key has copied"), false);
+      Serial.println(F("RFID write pass!"));
+    OLED_printError(F("RFID write: PASS"), false);
     Sd_ReadOK();
     delay(2000);
   }
@@ -773,7 +773,7 @@ emRWType getRfidRWtype(){
   sendOpT5557(0b00, 0, 0, 0, 0);  // send Reset
   delay(6);
   if (data32 != data33) return rwUnknown;    
-  Serial.print(F(" The rfid RW-key is T5557. Vendor ID is "));
+  Serial.print(F("The RFID RW-key is T5557. Vendor ID is "));
   Serial.println(data32, HEX);
   return T5557;
 }
@@ -785,8 +785,8 @@ bool write2rfid(){
       if (addr[i] != keyID[i]) { Check = false; break; }  // сравниваем код для записи с тем, что уже записано в ключе.
     if (Check) {                                          // если коды совпадают, ничего писать не нужно
       digitalWrite(R_Led, LOW); 
-      Serial.println(F(" it is the same key. Writing in not needed."));
-      OLED_printError(F("It is the same key"));
+      Serial.println(F("RFID code matches with given key. Writing not done."));
+      OLED_printError(F("RFID write FAIL: code matches."));
       Sd_ErrorBeep();
       digitalWrite(R_Led, HIGH);
       delay(1000);
@@ -794,7 +794,7 @@ bool write2rfid(){
     }
   }
   emRWType rwType = getRfidRWtype(); // определяем тип T5557 (T5577) или EM4305
-  if (rwType != rwUnknown) Serial.print(F("\n Burning rfid ID: "));
+  if (rwType != rwUnknown) Serial.print(F("\n Burning RFID ID: "));
   switch (rwType){
     case T5557: return write2rfidT5557(keyID); break;                    //пишем T5557
     //case EM4305: return write2rfidEM4305(keyID); break;                  //пишем EM4305
@@ -851,8 +851,8 @@ unsigned long stTimer = millis();
 void loop() {
   char echo = Serial.read();
   if (echo == 'e'){
-    myOLED.print(F("EEPROM cleared success!"), 0, 0);
-    Serial.println(F("EEPROM cleared"));
+    myOLED.print(F("EEPROM cleared successfully!"), 0, 0);
+    Serial.println(F("EEPROM cleared!"));
     EEPROM.update(0, 0); EEPROM.update(1, 0);
     EEPROM_key_count = 0; EEPROM_key_index = 0;
     Sd_ReadOK();
@@ -887,7 +887,7 @@ void loop() {
   }
   if ((copierMode != md_empty) && enc1.isHolded()){     // Если зажать кнопкку - ключ сохранися в EEPROM
     if (EPPROM_AddKey(keyID)) {
-      OLED_printError(F("The key saved"), false);
+      OLED_printError(F("The key code has been added to EEPROM."), false);
       Sd_ReadOK();
       delay(1000); 
     }
