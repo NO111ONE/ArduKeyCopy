@@ -850,8 +850,11 @@ unsigned long stTimer = millis();
 void loop() {
   char echo = Serial.read();
   if (echo == 'e'){
-    myOLED.print(F("EEPROM cleared successfully!"), 0, 0);
-    Serial.println(F("EEPROM cleared!"));
+    myOLED.print(F("EEPROM CLEARING!"), CENTER, 0);
+    myOLED.print(F("DO NOT POWER OFF!"), CENTER, 8);
+    myOLED.print(F("If you do, you risk bricking!"), CENTER, 16);
+    Serial.println(F("EEPROM clearing!"));
+    Serial.println(F("DO NOT POWER OFF UNTIL SCREEN RESETS! If you do, you risk bricking the Arduino, and unbricking will require a 2nd Arduino!"));
     EEPROM.update(0, 0); EEPROM.update(1, 0);
     EEPROM_key_count = 0; EEPROM_key_index = 0;
     Sd_ReadOK();
