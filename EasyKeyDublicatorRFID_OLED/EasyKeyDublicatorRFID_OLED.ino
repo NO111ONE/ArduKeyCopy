@@ -97,9 +97,8 @@ void setup() {
   Serial.begin(115200);
   myOLED.clrScr();                                          //Очищаем буфер дисплея.
   myOLED.setFont(SmallFont);                                //Перед выводом текста необходимо выбрать шрифт
-  myOLED.print(F("Welcome to ArduKeyCopy!"), LEFT, 0);
-  myOLED.print(F("by MEXATRON DIY"), LEFT, 0);
-  myOLED.print(F("\nfork by OBGuy"), LEFT, 0);
+  myOLED.print(F("ArduKeyCopy"), CENTER, 0);
+  myOLED.print(F("fork by OBGuy"), CENTER, 24);
   myOLED.update();
   Sd_StartOK();
   EEPROM_key_count = EEPROM[0];
