@@ -117,6 +117,7 @@ void setup() {
     copierMode = md_read;
     digitalWrite(G_Led, HIGH);
   } else {
+    myOLED.clrScr
     myOLED.print(F("ROM has no keys yet."), 0, 12);
     myOLED.update();  
   }
