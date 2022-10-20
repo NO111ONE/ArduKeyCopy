@@ -57,8 +57,8 @@ void OLED_printKey(byte buf[8], byte msgType = 0){
   String st;
   switch (msgType){
     case 0: st = "Key #" + String(EEPROM_key_index) + " of " + String(EEPROM_key_count) + " in ROM"; break;      
-    case 1: st = "Hold the button to save";  break; 
-    case 3: st = "The key " + String(indxKeyInROM(buf)) + " exists in ROM";  break;   
+    case 1: st = "Hold btn to save";  break; 
+    case 3: st = "Key " + String(indxKeyInROM(buf)) + " exists in ROM";  break;   
   }
   myOLED.clrScr();
   myOLED.print(st, 0, 0);  
@@ -232,12 +232,12 @@ emRWType getRWtype(){
   if (OneWire::crc8(m1, 3) == answer) {
     answer = ibutton.read();                                  // читаем регистр статуса
     //Serial.print(" status: "); Serial.println(answer, HEX);
-    Serial.println(F("Type: TM2004: Metacom/CYFRAL"));
+    Serial.println(F(" Type: TM2004: Metacom/CYFRAL"));
     ibutton.reset();
     return TM2004; // это Type: TM2004
   }
   ibutton.reset();
-  Serial.println(F("Type: DS????; using TM-01!"));
+  Serial.println(F(" Type: DS????; using TM-01!"));
   return TM01;                              // это неизвестный тип DS1990, нужно перебирать алгоритмы записи (TM-01)
 }
 
@@ -850,11 +850,13 @@ unsigned long stTimer = millis();
 void loop() {
   char echo = Serial.read();
   if (echo == 'e'){
+    myOLED.clrScr();
     myOLED.print(F("EEPROM CLEARING!"), CENTER, 0);
-    myOLED.print(F("DO NOT POWER OFF!"), CENTER, 8);
-    myOLED.print(F("If you do, you risk bricking!"), CENTER, 16);
+    myOLED.print(F("!!!DO NOT POWER OFF!!!"), CENTER, 8);
+    myOLED.print(F("After 5 seconds,"), CENTER, 16);
+    myOLED.print(F("tap a key to a reader!"), CENTER, 24);
     Serial.println(F("EEPROM clearing!"));
-    Serial.println(F("DO NOT POWER OFF UNTIL SCREEN RESETS! If you do, you risk bricking the Arduino, and unbricking will require a 2nd Arduino!"));
+    Serial.println(F("DO NOT POWER OFF FOR 5 SECONDS! If you do, you risk bricking the Arduino, and unbricking will require a 2nd Arduino!"));
     EEPROM.update(0, 0); EEPROM.update(1, 0);
     EEPROM_key_count = 0; EEPROM_key_index = 0;
     Sd_ReadOK();
@@ -889,7 +891,7 @@ void loop() {
   }
   if ((copierMode != md_empty) && enc1.isHolded()){     // Если зажать кнопкку - ключ сохранися в EEPROM
     if (EPPROM_AddKey(keyID)) {
-      OLED_printError(F("The key code has been added to EEPROM."), false);
+      OLED_printError(F("Code added to EEPROM."), false);
       Sd_ReadOK();
       delay(1000); 
     }
