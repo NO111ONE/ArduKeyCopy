@@ -4,6 +4,8 @@ Baud rate: 115200.
 
 # New features
 Better translations! Ain't that what-cha want?
+Manual code adding too. HOMEMADE UNIVERSAL KEYS!!! LET'S GO!!!
+I'm finding out whether A1 TM emulation works.
 
 # How to use
 
