@@ -34,6 +34,7 @@ Tap the original key to the reader. Then, hold the encoder button to save. Wait 
 ### Clear EEPROM
 Send `e` in serial monitor. 
 **DANGER!** If you do not wait for the OLED screen to reset, you risk bricking the Arduino.
+*okay, quick edit - I think that was just a bug of my chinese arduino bootloader, so, just so you know. it never happened again.*
 
 ## Other interactions
 
