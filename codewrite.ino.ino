@@ -32,7 +32,7 @@ void loop() {
   int b4 = 255;
   int b5 = 255;
   int b6 = 255;
-  int crc = 47R; //calculate this with OWCRC.exe
+  int crc = 47; //calculate this with OWCRC.exe
   
   /***
 
