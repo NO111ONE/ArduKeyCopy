@@ -68,7 +68,7 @@ void OLED_printKey(byte buf[8], byte msgType = 0){
   st = "Type ";
   switch (keyType){
     case keyDallas: st += "DS1990"; break;      
-    case keyCyfral: st += "CF2004";  break;  
+    case keyCyfral: st += "DC2000";  break;  
     case keyMetacom: st += "MT200X"; break;             
     case keyEM_Marine: st += "EM_Marin RFID"; break;
     case keyUnknown: st += "Unknown"; break;
@@ -418,7 +418,7 @@ bool searchIbutton(){
     return true;
   }
   switch (addr[0]>>4){
-    case 1: Serial.println(F("Type: CF2004 in DS1990")); break;      
+    case 1: Serial.println(F("Type: DC2000 in DS1990")); break;      
     case 2: Serial.println(F("Type: MT200X in DS1990"));  break;  
     case 3: Serial.println(F("Type: DS????")); break;             
   }
@@ -500,7 +500,7 @@ bool searchCyfral(){
     Serial.print(addr[i], HEX); Serial.print(":");
     keyID[i] = addr[i];                                         // копируем прочтенный код в ReadID
   }
-  Serial.println(F("Type: CF2004"));
+  Serial.println(F("Type: DC2000"));
   return true;  
 }
 
@@ -853,11 +853,10 @@ void loop() {
   if (echo == 'e'){
     myOLED.clrScr();
     myOLED.print(F("EEPROM CLEARING!"), CENTER, 0);
-    myOLED.print(F("!!!DO NOT POWER OFF!!!"), CENTER, 8);
-    myOLED.print(F("After 5 seconds,"), CENTER, 16);
-    myOLED.print(F("tap a key to a reader!"), CENTER, 24);
+    myOLED.print(F("Warning:"), CENTER, 8);
+    myOLED.print(F("CN Arduinos may brick"), LEFT, 16);
     Serial.println(F("EEPROM clearing!"));
-    Serial.println(F("DO NOT POWER OFF FOR 5 SECONDS! If you do, you risk bricking the Arduino, and unbricking will require a 2nd Arduino!"));
+    Serial.println(F("Warning! Chinese Arduinos may be bricked."));
     EEPROM.update(0, 0); EEPROM.update(1, 0);
     EEPROM_key_count = 0; EEPROM_key_index = 0;
     Sd_ReadOK();
