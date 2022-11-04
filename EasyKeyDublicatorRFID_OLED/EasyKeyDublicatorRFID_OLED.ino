@@ -427,6 +427,22 @@ bool searchIbutton(){
 }
 
 //************ Cyfral ***********************
+/*
+Well, this is really weird code. I don't understand it.
+
+If you didn't know, Cyfral keys are 2 bytes long. Their encoding, however, is just something I don't understand.
+Here's a datasheet in Russian: http://www.155la3.ru/datafiles/1233kt1.pdf
+If you can't read it, I'll do it for you.
+
+Basically the code is sent like this:
+STRT [byte x8] STRT
+There are 4 different bytes in total: 0x1110 is 0; 0x1101 is 1; 0x1011 is 2; 0x0111 is 3. Start byte is 0x0001.
+How do you decode that to hex? I HAVE NO IDEA
+From the original videos the first byte is E2. I do and don't want to get an RW/DC2000 blank to test. 
+Yeah, they cost ~$0.6; though the recommended programmer costs $100. We're not in for that!
+
+Someone tell me how does this work.
+*/
 unsigned long pulseACompA(bool pulse, byte Average = 80, unsigned long timeOut = 1500){  // pulse HIGH or LOW
   bool AcompState;
   unsigned long tEnd = micros() + timeOut;
@@ -472,22 +488,22 @@ bool read_cyfral(byte* buf, byte CyfralPin){
   unsigned long tEnd = millis() + 30;
   do{
     ti = pulseACompA(HIGH, aver);
-    if ((ti == 0) || (ti > 260) || (ti < 10)) {i = 0; j=0; k = 0; continue;}
-    if ((i < 3) && (ti > halfT)) {i = 0; j = 0; k = 0; continue;}      //контроль стартовой последовательности 0b0001
+    if ((ti == 0) || (ti > 260) || (ti < 10)) {i = 0; j=0; k = 0; continue;} //check spent time: none; too much or too little, then restart
+    if ((i < 3) && (ti > halfT)) {i = 0; j = 0; k = 0; continue;}      //start byte is 0x0001, check that
     if ((i == 3) && (ti < halfT)) continue;      
     if (ti > halfT) bitSet(buf[i >> 3], 7-j);
       else if (i > 3) k++; 
-    if ((i > 3) && ((i-3)%4 == 0) ){        //начиная с 4-го бита проверяем количество нулей каждой строки из 4-и бит
-      if (k != 1) {for (byte n = 0; n < (i >> 3)+2; n++) buf[n] = 0; i = 0; j = 0; k = 0; continue;}        //если нулей больше одной - начинаем сначала 
+    if ((i > 3) && ((i-3)%4 == 0) ){        // from bit #4 check amt of zeroes
+      if (k != 1) {for (byte n = 0; n < (i >> 3)+2; n++) buf[n] = 0; i = 0; j = 0; k = 0; continue;}        //if there isn't only 1 zero - start over
       k = 0; 
     }
     j++; if (j>7) j=0;
-    i++;
-  } while ((millis() < tEnd) && (i < 36));
-  if (i < 36) return false;
+    i++; // bit read 
+  } while ((millis() < tEnd) && (i < 36)); // keep going until we either run out of some time OR read the code
+  if (i < 36) return false; //make sure the 4 + 28 + 4 bits were read
   return true;
 }
-
+// I only want to find out what data does he collect.
 bool searchCyfral(){
   byte buf[8];
   for (byte i = 0; i < 8; i++) {addr[i] =0; buf[i] = 0;}
@@ -497,7 +513,7 @@ bool searchCyfral(){
     if (addr[i] != buf[i]) return false;
   keyType = keyCyfral;
   for (byte i = 0; i < 8; i++) {
-    Serial.print(addr[i], HEX); Serial.print(":");
+    Serial.print(addr[i], HEX); Serial.print(":"); //Here something is printed, but what? Maybe printing BIN or HEX can help.
     keyID[i] = addr[i];                                         // копируем прочтенный код в ReadID
   }
   Serial.println(F("Type: DC2000"));
@@ -526,7 +542,16 @@ byte calcAverage(){
   halfT = (byte)((micros() - tSt) / j);
   return (byte)sum;
 }
+/*
+Metacom - this is
+STRT [byte x4]
+STRT is 0x010
+Bytes are 7 bits + 1 parity bit long.
+The parity bit is a 0 if there are even 0x1's or a 1 if there are odd 0x1's. TLDR: make the 0x1 bits in byte even.
 
+These are 4 bytes long in hex.
+This reader once again has to f*** it up and make the reads 5 bytes long. WHY???
+*/
 bool read_metacom(byte* buf, byte MetacomPin){
   unsigned long ti; byte i = 0, j = 0, k = 0;
   analogRead(iButtonPin);
@@ -543,7 +568,7 @@ bool read_metacom(byte* buf, byte MetacomPin){
       bitSet(buf[i >> 3], 7-j);
       if (i > 3) k++;                             // считаем кол-во единиц
     }
-    if ((i > 3) && ((i-3)%8 == 0) ){        //начиная с 4-го бита проверяем контроль четности каждой строки из 8-и бит
+    if ((i > 3) && ((i-3)%8 == 0) ){        // starting from bit #4 check parity (datasheet says its on bit 8...)
       if (k & 1) { for (byte n = 0; n < (i >> 3)+1; n++) buf[n] = 0; i = 0; j = 0;  k = 0; continue;}              //если нечетно - начинаем сначала
       k = 0;
     }   
@@ -563,14 +588,14 @@ bool searchMetacom(){
     if (addr[i] != buf[i]) return false; 
   keyType = keyMetacom;
   for (byte i = 0; i < 8; i++) {
-    Serial.print(addr[i], HEX); Serial.print(":");
+    Serial.print(addr[i], HEX); Serial.print(":"); //Again, same with Cyfral - what is being printed?
     keyID[i] = addr[i];                               // копируем прочтенный код в ReadID
   }
-  Serial.println(F(" Type: Metacom "));
+  Serial.println(F("Type: MT200X"));
   return true;  
 }
 
-//**********EM-Marine***************************
+//**********EM-Marin***************************
 bool vertEvenCheck(byte* buf){        // проверка четности столбцов с данными
   byte k;
   k = 1&buf[1]>>6 + 1&buf[1]>>1 + 1&buf[2]>>4 + 1&buf[3]>>7 + 1&buf[3]>>2 + 1&buf[4]>>5 + 1&buf[4] + 1&buf[5]>>3 + 1&buf[6]>>6 + 1&buf[6]>>1 + 1&buf[7]>>4;
