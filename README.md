@@ -40,3 +40,10 @@ Send `e` in serial monitor.
 
 ### Manually toggle Writeflag
 Send `t` in serial monitor.
+
+### Get 5 byte RFID code
+**This needs a PC!** For now.
+
+Open the serial monitor and tap your tag to the reader. You will see data: `ID XXX key YYYYYYYYYY`. Convert these values to hex. The data is the code.
+
+Example: VIZIT universal: 56:5A:11:40:BE = 86 + 1511080126
