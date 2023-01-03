@@ -2,6 +2,27 @@
 Simple RFID (EM-Marin (yes, like that)) and wired (Dallas, Cyfral, Metacom) key duplicator with arduino. Supports EM4305, T5577, RW-1990.1 RW-1990.2 TM-01 TM2004 protocols. There are connection schemes in the project.
 Baud rate: 115200.
 
+A device (key) support list is given below.
+
+| KEY | DALLAS | CYFRAL | METAKOM |
+| --- | --- | --- | --- |
+| RW1990 | RW | \- | \- |
+| TM08 | RW | \- | \- |
+| KC-4TM | RW | \- | \- |
+| TM01 | RW | R | R |
+| RW15 | \- | R | R |
+| KC-07 | \- | X | X |
+
+I don't know why KC-07 doesn't read. RF chart below
+
+| KEY | SUPPORT |
+| --- | --- |
+| ATA55XX | RW; EM-marin only; unlocked only |
+| EM4305 | Unknown
+| H5 | X |
+| H7 | X |
+| iKEY OTP | X |
+
 # New features
 Better translations! Ain't that what-cha want?
 Manual code adding too. HOMEMADE UNIVERSAL KEYS!!! LET'S GO!!!
