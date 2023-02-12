@@ -9,11 +9,15 @@ A device (key) support list is given below.
 | RW1990 | RW | \- | \- |
 | TM08 | RW | \- | \- |
 | KC-4TM | RW | \- | \- |
-| TM01 | RW | R | R |
-| RW15 | \- | R* | R |
+| TM01 | RW* | R | R |
+| RW2017 | - | R | R |
+| RW15 | \- | R** | R |
 | KC-07 | \- | X | X |
 
-KC-07 does not read likely due to it using high voltage. RW15 requires this config: load resistor ON; speed is lower than "Very fast". RF chart below
+Do **NOT** attempt to program your TM01 keys with this yet!!! You WILL break them; this function is NOT yet properly added!
+
+KC-07 does not read likely due to it using high voltage. 
+RW15 requires this config: load resistor ON; speed is lower than "Very fast". RF chart below
 
 | KEY | SUPPORT |
 | --- | --- |
