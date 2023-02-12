@@ -9,7 +9,7 @@ A device (key) support list is given below.
 | RW1990 | RW | \- | \- |
 | TM08 | RW | \- | \- |
 | KC-4TM | RW | \- | \- |
-| TM01 | RW* | R | R |
+| TM01 | RW | R W* | R W* |
 | RW2017 | - | R | R |
 | RW15 | \- | R** | R |
 | KC-07 | \- | X | X |
